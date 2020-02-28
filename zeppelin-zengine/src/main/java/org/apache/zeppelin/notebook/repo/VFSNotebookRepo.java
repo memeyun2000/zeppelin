@@ -99,6 +99,11 @@ public class VFSNotebookRepo implements NotebookRepo {
     }
   }
 
+  /**
+   * guoqy: 查询所有笔记信息（noteInfo）
+   * @return
+   * @throws IOException
+   */
   @Override
   public List<NoteInfo> list() throws IOException {
     FileObject rootDir = getRootDir();
@@ -169,6 +174,13 @@ public class VFSNotebookRepo implements NotebookRepo {
     return note;
   }
 
+  /**
+   * 通过note（目录）获取note book 信息
+   * NoteInfo 包含 id name config<Map>
+   * @param noteDir
+   * @return
+   * @throws IOException
+   */
   private NoteInfo getNoteInfo(FileObject noteDir) throws IOException {
     Note note = getNote(noteDir);
     return new NoteInfo(note);
