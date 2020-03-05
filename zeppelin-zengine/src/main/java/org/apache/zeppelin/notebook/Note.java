@@ -72,7 +72,7 @@ public class Note implements Serializable, JobListener {
 
   private transient NoteInterpreterLoader replLoader;
   private transient JobListenerFactory jobListenerFactory;
-  private transient NotebookRepo repo;
+  private transient NotebookRepo repo; // guoqy: notebook 仓库
   private transient SearchService index;
   private transient ScheduledFuture delayedPersist;
   private transient Credentials credentials;
@@ -502,7 +502,7 @@ public class Note implements Serializable, JobListener {
   }
 
   public void persist(AuthenticationInfo subject) throws IOException {
-    stopDelayedPersistTimer();
+    stopDelayedPersistTimer(); // guoqy: ???
     snapshotAngularObjectRegistry();
     index.updateIndexDoc(this);
     repo.save(this, subject);

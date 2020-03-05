@@ -138,18 +138,22 @@ public class NotebookServer extends WebSocketServlet implements
       /** Lets be elegant here */
       switch (messagereceived.op) {
           case LIST_NOTES:
+            // guoqy: 对当前conn返回notes信息
             unicastNoteList(conn, subject);
             break;
           case RELOAD_NOTES_FROM_REPO:
+            // guoqy: 重新构建notesInfo广播至所有连接
             broadcastReloadedNoteList(subject);
             break;
           case GET_HOME_NOTE:
             sendHomeNote(conn, userAndRoles, notebook, messagereceived);
             break;
           case GET_NOTE:
+            //
             sendNote(conn, userAndRoles, notebook, messagereceived);
             break;
           case NEW_NOTE:
+            //guoqy: 新建笔记
             createNote(conn, userAndRoles, notebook, messagereceived);
             break;
           case DEL_NOTE:
@@ -390,6 +394,10 @@ public class NotebookServer extends WebSocketServlet implements
     broadcast(note.id(), new Message(OP.NOTE).put("note", note));
   }
 
+  /**
+   * guoqy:对所有的conn广播notesInfo[List[Map[String,String]]]
+   * @param subject
+   */
   public void broadcastNoteList(AuthenticationInfo subject) {
     List<Map<String, String>> notesInfo = generateNotebooksInfo(false, subject);
     broadcastAll(new Message(OP.NOTES_INFO).put("notes", notesInfo));
@@ -521,6 +529,21 @@ public class NotebookServer extends WebSocketServlet implements
 
     return cronUpdated;
   }
+
+  /**
+   * guoqy:
+   * 1. 创建新 note 刷新本地interpreter.json
+   * 2. 添加一个新行
+   * 3. 重新命名新笔记本的名字为 用户定义的名字
+   * 4. 存储note至本地（notebook文件夹）
+   * 5. 对原conn连接 返回闯将的note信息
+   * 6. 对所有的conn广播 notesInfo[List[Map[String,String]]] 信息
+   * @param conn
+   * @param userAndRoles
+   * @param notebook
+   * @param message
+   * @throws IOException
+   */
   private void createNote(NotebookSocket conn, HashSet<String> userAndRoles,
                           Notebook notebook, Message message)
       throws IOException {

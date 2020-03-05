@@ -700,8 +700,8 @@ public class InterpreterFactory implements InterpreterGroupFactory {
         }
       }
       interpreterBindings.put(noteId, settingList);
-      saveToFile();
-
+      saveToFile(); //guoqy: 保存interpreter.json 落地文件
+      // guoqy: 不明白为什么要移除并不存在 settingList 中的 过时的 interpreterSetting 。看似多此一举？
       for (String settingId : unBindedSettings) {
         InterpreterSetting setting = get(settingId);
         removeInterpretersForNote(setting, noteId);
