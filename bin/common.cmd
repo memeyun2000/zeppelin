@@ -69,10 +69,6 @@ if not defined ZEPPELIN_MEM (
     set ZEPPELIN_MEM=-Xms1024m -Xmx1024m -XX:MaxPermSize=512m
 )
 
-if not defined ZEPPELIN_INTP_MEM (
-    set ZEPPELIN_INTP_MEM=-Xms1024m -Xmx1024m -XX:MaxPermSize=512m
-)
-
 if not defined ZEPPELIN_JAVA_OPTS (
     set ZEPPELIN_JAVA_OPTS=-Dfile.encoding=%ZEPPELIN_ENCODING% %ZEPPELIN_MEM%
 ) else (
@@ -85,6 +81,13 @@ if not defined JAVA_OPTS (
     set JAVA_OPTS=%JAVA_OPTS% %ZEPPELIN_JAVA_OPTS%
 )
 
+if not defined ZEPPELIN_INTP_JAVA_OPTS (
+    set ZEPPELIN_INTP_JAVA_OPTS=%ZEPPELIN_JAVA_OPTS%
+)
+
+if not defined ZEPPELIN_INTP_MEM (
+    set ZEPPELIN_INTP_MEM=%ZEPPELIN_MEM%
+)
 
 set JAVA_INTP_OPTS=%ZEPPELIN_INTP_JAVA_OPTS% -Dfile.encoding=%ZEPPELIN_ENCODING%
 

@@ -272,15 +272,10 @@ public class ZeppelinConfiguration extends XMLConfiguration {
   }
 
   public String getKeyStorePath() {
-    String path = getString(ConfVars.ZEPPELIN_SSL_KEYSTORE_PATH);
-    if (path != null && path.startsWith("/") || isWindowsPath(path)) {
-      return path;
-    } else {
-      return getRelativeDir(
-          String.format("%s/%s",
-              getConfDir(),
-              getString(path)));
-    }
+    return getRelativeDir(
+            String.format("%s/%s",
+                    getConfDir(),
+                    getString(ConfVars.ZEPPELIN_SSL_KEYSTORE_PATH)));
   }
 
   public String getKeyStoreType() {
@@ -302,13 +297,10 @@ public class ZeppelinConfiguration extends XMLConfiguration {
 
   public String getTrustStorePath() {
     String path = getString(ConfVars.ZEPPELIN_SSL_TRUSTSTORE_PATH);
-    if (path != null && path.startsWith("/") || isWindowsPath(path)) {
-      return path;
+    if (path == null) {
+      return getKeyStorePath();
     } else {
-      return getRelativeDir(
-          String.format("%s/%s",
-              getConfDir(),
-              getString(path)));
+      return getRelativeDir(path);
     }
   }
 
@@ -517,8 +509,7 @@ public class ZeppelinConfiguration extends XMLConfiguration {
         + "org.apache.zeppelin.elasticsearch.ElasticsearchInterpreter,"
         + "org.apache.zeppelin.scalding.ScaldingInterpreter,"
         + "org.apache.zeppelin.jdbc.JDBCInterpreter,"
-        + "org.apache.zeppelin.hbase.HbaseInterpreter,"
-        + "org.apache.zeppelin.bigquery.BigQueryInterpreter"),
+        + "org.apache.zeppelin.hbase.HbaseInterpreter"),
     ZEPPELIN_INTERPRETER_JSON("zeppelin.interpreter.setting", "interpreter-setting.json"),
     ZEPPELIN_INTERPRETER_DIR("zeppelin.interpreter.dir", "interpreter"),
     ZEPPELIN_INTERPRETER_LOCALREPO("zeppelin.interpreter.localRepo", "local-repo"),
@@ -544,6 +535,8 @@ public class ZeppelinConfiguration extends XMLConfiguration {
                 .startsWith("Windows") ? "bin/interpreter.cmd" : "bin/interpreter.sh"),
     // Decide when new note is created, interpreter settings will be binded automatically or not.
     ZEPPELIN_NOTEBOOK_AUTO_INTERPRETER_BINDING("zeppelin.notebook.autoInterpreterBinding", true),
+//    ZEPPELIN_CONF_DIR("zeppelin.conf.dir", "conf"),
+      //guoqy: run local
     ZEPPELIN_CONF_DIR("zeppelin.conf.dir", "conf"),
     ZEPPELIN_DEP_LOCALREPO("zeppelin.dep.localrepo", "local-repo"),
     // Allows a way to specify a ',' separated list of allowed origins for rest and websockets

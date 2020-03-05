@@ -501,15 +501,8 @@ public class NotebookRestApi {
     if (note == null) {
       return new JsonResponse<>(Status.NOT_FOUND, "note not found.").build();
     }
-
-    try {
-      note.runAll();
-    } catch (Exception ex) {
-      LOG.error("Exception from run", ex);
-      return new JsonResponse<>(Status.PRECONDITION_FAILED,
-          ex.getMessage() + "- Not selected or Invalid Interpreter bind").build();
-    }
-
+    
+    note.runAll();
     return new JsonResponse<>(Status.OK).build();
   }
 

@@ -33,7 +33,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.kerberos.client.KerberosRestTemplate;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.Charset;
@@ -97,7 +96,7 @@ public class LivyHelper {
               }.getType());
           if (jsonMap.get("state").equals("idle")) {
             break;
-          } else if (jsonMap.get("state").equals("error") || jsonMap.get("state").equals("dead")) {
+          } else if (jsonMap.get("state").equals("error")) {
             json = executeHTTP(property.getProperty("zeppelin.livy.url") + "/sessions/" +
                     sessionId + "/log",
                 "GET", null,
@@ -121,6 +120,12 @@ public class LivyHelper {
       LOGGER.error("Error getting session for user", e);
       throw e;
     }
+  }
+
+  protected void initializeSpark(final InterpreterContext context,
+                                 final Map<String, Integer> userSessionMap) throws Exception {
+    interpret("val sqlContext= new org.apache.spark.sql.SQLContext(sc)\n" +
+        "import sqlContext.implicits._", context, userSessionMap);
   }
 
   public InterpreterResult interpretInput(String stringLines,
@@ -337,24 +342,17 @@ public class LivyHelper {
     HttpHeaders headers = new HttpHeaders();
     headers.add("Content-Type", "application/json");
     ResponseEntity<String> response = null;
-    try {
-      if (method.equals("POST")) {
-        HttpEntity<String> entity = new HttpEntity<String>(jsonData, headers);
-
-        response = restTemplate.exchange(targetURL, HttpMethod.POST, entity, String.class);
-        paragraphHttpMap.put(paragraphId, response);
-      } else if (method.equals("GET")) {
-        HttpEntity<String> entity = new HttpEntity<String>(headers);
-        response = restTemplate.exchange(targetURL, HttpMethod.GET, entity, String.class);
-        paragraphHttpMap.put(paragraphId, response);
-      } else if (method.equals("DELETE")) {
-        HttpEntity<String> entity = new HttpEntity<String>(headers);
-        response = restTemplate.exchange(targetURL, HttpMethod.DELETE, entity, String.class);
-      }
-    } catch (HttpClientErrorException e) {
-      response = new ResponseEntity(e.getResponseBodyAsString(), e.getStatusCode());
-      LOGGER.error(String.format("Error with %s StatusCode: %s",
-          response.getStatusCode().value(), e.getResponseBodyAsString()));
+    if (method.equals("POST")) {
+      HttpEntity<String> entity = new HttpEntity<String>(jsonData, headers);
+      response = restTemplate.exchange(targetURL, HttpMethod.POST, entity, String.class);
+      paragraphHttpMap.put(paragraphId, response);
+    } else if (method.equals("GET")) {
+      HttpEntity<String> entity = new HttpEntity<String>(headers);
+      response = restTemplate.exchange(targetURL, HttpMethod.GET, entity, String.class);
+      paragraphHttpMap.put(paragraphId, response);
+    } else if (method.equals("DELETE")) {
+      HttpEntity<String> entity = new HttpEntity<String>(headers);
+      response = restTemplate.exchange(targetURL, HttpMethod.DELETE, entity, String.class);
     }
     if (response == null) {
       return null;

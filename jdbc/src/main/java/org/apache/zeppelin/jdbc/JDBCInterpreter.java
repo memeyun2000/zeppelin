@@ -259,35 +259,25 @@ public class JDBCInterpreter extends Interpreter {
 
   @Override
   public void close() {
+
     try {
       for (List<Connection> connectionList : propertyKeyUnusedConnectionListMap.values()) {
         for (Connection c : connectionList) {
-          try {
-            c.close();
-          } catch (Exception e) {
-            logger.error("Error while closing propertyKeyUnusedConnectionListMap connection...", e);
-          }
+          c.close();
         }
       }
 
       for (Statement statement : paragraphIdStatementMap.values()) {
-        try {
-          statement.close();
-        } catch (Exception e) {
-          logger.error("Error while closing paragraphIdStatementMap statement...", e);
-        }
+        statement.close();
       }
       paragraphIdStatementMap.clear();
 
       for (Connection connection : paragraphIdConnectionMap.values()) {
-        try {
-          connection.close();
-        } catch (Exception e) {
-          logger.error("Error while closing paragraphIdConnectionMap connection...", e);
-        }
+        connection.close();
       }
       paragraphIdConnectionMap.clear();
-    } catch (Exception e) {
+
+    } catch (SQLException e) {
       logger.error("Error while closing...", e);
     }
   }
@@ -374,9 +364,7 @@ public class JDBCInterpreter extends Interpreter {
 
     } catch (Exception e) {
       logger.error("Cannot run " + sql, e);
-      StringBuilder stringBuilder = new StringBuilder();
-      stringBuilder.append(e.getMessage()).append("\n");
-      stringBuilder.append(e.getClass().toString()).append("\n");
+      StringBuilder stringBuilder = new StringBuilder(e.getClass().toString()).append("\n");
       stringBuilder.append(StringUtils.join(e.getStackTrace(), "\n"));
       return new InterpreterResult(Code.ERROR, stringBuilder.toString());
     }

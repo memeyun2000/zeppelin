@@ -86,6 +86,7 @@ Thumbs.db
 #intelliJ IDEA project files
 .idea/
 *.iml
+.factorypath
 
 # maven target files
 target/

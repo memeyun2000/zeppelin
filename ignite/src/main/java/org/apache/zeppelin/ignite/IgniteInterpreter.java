@@ -44,7 +44,6 @@ import java.util.Properties;
 import scala.Console;
 import scala.None;
 import scala.Some;
-import scala.collection.JavaConversions;
 import scala.tools.nsc.Settings;
 import scala.tools.nsc.interpreter.IMain;
 import scala.tools.nsc.interpreter.Results.Result;
@@ -174,11 +173,16 @@ public class IgniteInterpreter extends Interpreter {
     return paths;
   }
 
-  public Object getLastObject() {
-    Object obj = imain.lastRequest().lineRep().call(
-        "$result",
-        JavaConversions.asScalaBuffer(new LinkedList<Object>()));
-    return obj;
+  public Object getValue(String name) {
+    Object val = imain.valueOfTerm(name);
+
+    if (val instanceof None) {
+      return null;
+    } else if (val instanceof Some) {
+      return ((Some) val).get();
+    } else {
+      return val;
+    }
   }
 
   private Ignite getIgnite() {
@@ -216,20 +220,15 @@ public class IgniteInterpreter extends Interpreter {
   }
 
   private void initIgnite() {
-    ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-    try {
-      imain.interpret("@transient var _binder = new java.util.HashMap[String, Object]()");
-      Map<String, Object> binder = (Map<String, Object>) getLastObject();
+    imain.interpret("@transient var _binder = new java.util.HashMap[String, Object]()");
+    Map<String, Object> binder = (Map<String, Object>) getValue("_binder");
 
-      if (getIgnite() != null) {
-        binder.put("ignite", ignite);
+    if (getIgnite() != null) {
+      binder.put("ignite", ignite);
 
-        imain.interpret("@transient val ignite = "
-            + "_binder.get(\"ignite\")"
-            + ".asInstanceOf[org.apache.ignite.Ignite]");
-      }
-    } finally {
-      Thread.currentThread().setContextClassLoader(contextClassLoader);
+      imain.interpret("@transient val ignite = "
+              + "_binder.get(\"ignite\")"
+              + ".asInstanceOf[org.apache.ignite.Ignite]");
     }
   }
 
@@ -300,14 +299,11 @@ public class IgniteInterpreter extends Interpreter {
         }
       }
 
-      ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
       try {
         code = getResultCode(imain.interpret(incomplete + s));
       } catch (Exception e) {
         logger.info("Interpreter exception", e);
         return new InterpreterResult(Code.ERROR, InterpreterUtils.getMostRelevantMessage(e));
-      } finally {
-        Thread.currentThread().setContextClassLoader(contextClassLoader);
       }
 
       if (code == Code.ERROR) {

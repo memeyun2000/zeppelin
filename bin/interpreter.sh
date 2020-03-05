@@ -53,27 +53,18 @@ fi
 
 . "${bin}/common.sh"
 
-ZEPPELIN_INTP_CLASSPATH=""
+ZEPPELIN_CLASSPATH+=":${ZEPPELIN_CONF_DIR}"
 
 # construct classpath
 if [[ -d "${ZEPPELIN_HOME}/zeppelin-interpreter/target/classes" ]]; then
-  ZEPPELIN_INTP_CLASSPATH+=":${ZEPPELIN_HOME}/zeppelin-interpreter/target/classes"
+  ZEPPELIN_CLASSPATH+=":${ZEPPELIN_HOME}/zeppelin-interpreter/target/classes"
 else
   ZEPPELIN_INTERPRETER_JAR="$(ls ${ZEPPELIN_HOME}/lib/zeppelin-interpreter*.jar)"
-  ZEPPELIN_INTP_CLASSPATH+=":${ZEPPELIN_INTERPRETER_JAR}"
+  ZEPPELIN_CLASSPATH+=":${ZEPPELIN_INTERPRETER_JAR}"
 fi
 
-# add test classes for unittest
-if [[ -d "${ZEPPELIN_HOME}/zeppelin-interpreter/target/test-classes" ]]; then
-  ZEPPELIN_INTP_CLASSPATH+=":${ZEPPELIN_HOME}/zeppelin-interpreter/target/test-classes"
-fi
-if [[ -d "${ZEPPELIN_HOME}/zeppelin-zengine/target/test-classes" ]]; then
-  ZEPPELIN_INTP_CLASSPATH+=":${ZEPPELIN_HOME}/zeppelin-zengine/target/test-classes"
-fi
-
-
-addJarInDirForIntp "${ZEPPELIN_HOME}/zeppelin-interpreter/target/lib"
-addJarInDirForIntp "${INTERPRETER_DIR}"
+addJarInDir "${ZEPPELIN_HOME}/zeppelin-interpreter/target/lib"
+addJarInDir "${INTERPRETER_DIR}"
 
 HOSTNAME=$(hostname)
 ZEPPELIN_SERVER=org.apache.zeppelin.interpreter.remote.RemoteInterpreterServer
@@ -94,7 +85,7 @@ if [[ "${INTERPRETER_ID}" == "spark" ]]; then
     export SPARK_SUBMIT="${SPARK_HOME}/bin/spark-submit"
     SPARK_APP_JAR="$(ls ${ZEPPELIN_HOME}/interpreter/spark/zeppelin-spark*.jar)"
     # This will evantually passes SPARK_APP_JAR to classpath of SparkIMain
-    ZEPPELIN_INTP_CLASSPATH+=":${SPARK_APP_JAR}"
+    ZEPPELIN_CLASSPATH+=${SPARK_APP_JAR}
 
     pattern="$SPARK_HOME/python/lib/py4j-*-src.zip"
     py4j=($pattern)
@@ -105,14 +96,14 @@ if [[ "${INTERPRETER_ID}" == "spark" ]]; then
     # add Hadoop jars into classpath
     if [[ -n "${HADOOP_HOME}" ]]; then
       # Apache
-      addEachJarInDirRecursiveForIntp "${HADOOP_HOME}/share"
+      addEachJarInDirRecursive "${HADOOP_HOME}/share"
 
       # CDH
-      addJarInDirForIntp "${HADOOP_HOME}"
-      addJarInDirForIntp "${HADOOP_HOME}/lib"
+      addJarInDir "${HADOOP_HOME}"
+      addJarInDir "${HADOOP_HOME}/lib"
     fi
 
-    addJarInDirForIntp "${INTERPRETER_DIR}/dep"
+    addJarInDir "${INTERPRETER_DIR}/dep"
 
     pattern="${ZEPPELIN_HOME}/interpreter/spark/pyspark/py4j-*-src.zip"
     py4j=($pattern)
@@ -136,29 +127,29 @@ if [[ "${INTERPRETER_ID}" == "spark" ]]; then
     fi
 
     if [[ -n "${HADOOP_CONF_DIR}" ]] && [[ -d "${HADOOP_CONF_DIR}" ]]; then
-      ZEPPELIN_INTP_CLASSPATH+=":${HADOOP_CONF_DIR}"
+      ZEPPELIN_CLASSPATH+=":${HADOOP_CONF_DIR}"
     fi
 
-    export SPARK_CLASSPATH+=":${ZEPPELIN_INTP_CLASSPATH}"
+    export SPARK_CLASSPATH+=":${ZEPPELIN_CLASSPATH}"
   fi
 elif [[ "${INTERPRETER_ID}" == "hbase" ]]; then
   if [[ -n "${HBASE_CONF_DIR}" ]]; then
-    ZEPPELIN_INTP_CLASSPATH+=":${HBASE_CONF_DIR}"
+    ZEPPELIN_CLASSPATH+=":${HBASE_CONF_DIR}"
   elif [[ -n "${HBASE_HOME}" ]]; then
-    ZEPPELIN_INTP_CLASSPATH+=":${HBASE_HOME}/conf"
+    ZEPPELIN_CLASSPATH+=":${HBASE_HOME}/conf"
   else
     echo "HBASE_HOME and HBASE_CONF_DIR are not set, configuration might not be loaded"
   fi
 fi
 
-addJarInDirForIntp "${LOCAL_INTERPRETER_REPO}"
+addJarInDir "${LOCAL_INTERPRETER_REPO}"
 
-CLASSPATH+=":${ZEPPELIN_INTP_CLASSPATH}"
+CLASSPATH+=":${ZEPPELIN_CLASSPATH}"
 
 if [[ -n "${SPARK_SUBMIT}" ]]; then
-    ${SPARK_SUBMIT} --class ${ZEPPELIN_SERVER} --driver-class-path "${ZEPPELIN_INTP_CLASSPATH_OVERRIDES}:${CLASSPATH}" --driver-java-options "${JAVA_INTP_OPTS}" ${SPARK_SUBMIT_OPTIONS} ${SPARK_APP_JAR} ${PORT} &
+    ${SPARK_SUBMIT} --class ${ZEPPELIN_SERVER} --driver-class-path "${ZEPPELIN_CLASSPATH_OVERRIDES}:${CLASSPATH}" --driver-java-options "${JAVA_INTP_OPTS}" ${SPARK_SUBMIT_OPTIONS} ${SPARK_APP_JAR} ${PORT} &
 else
-    ${ZEPPELIN_RUNNER} ${JAVA_INTP_OPTS} ${ZEPPELIN_INTP_MEM} -cp ${ZEPPELIN_INTP_CLASSPATH_OVERRIDES}:${CLASSPATH} ${ZEPPELIN_SERVER} ${PORT} &
+    ${ZEPPELIN_RUNNER} ${JAVA_INTP_OPTS} ${ZEPPELIN_INTP_MEM} -cp ${ZEPPELIN_CLASSPATH_OVERRIDES}:${CLASSPATH} ${ZEPPELIN_SERVER} ${PORT} &
 fi
 
 pid=$!

@@ -90,8 +90,6 @@ public class ZeppelinClient {
     SslContextFactory sslContextFactory = new SslContextFactory();
     WebSocketClient client = new WebSocketClient(sslContextFactory);
     client.setMaxIdleTimeout(5 * min * 1000);
-    client.setMaxTextMessageBufferSize(Client.getMaxNoteSize());
-    client.getPolicy().setMaxTextMessageSize(Client.getMaxNoteSize());
     //TODO(khalid): other client settings
     return client;
   }

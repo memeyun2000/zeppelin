@@ -32,9 +32,6 @@ public class Client {
   private final ZeppelinClient zeppelinClient;
   private static Client instance = null;
 
-  private static final int MB = 1048576;
-  private static final int MAXIMUM_NOTE_SIZE = 64 * MB;
-
   public static Client initialize(String zeppelinUri, String zeppelinhubUri, String token, 
       ZeppelinConfiguration conf) {
     if (instance == null) {
@@ -78,9 +75,5 @@ public class Client {
 
   public void relayToZeppelin(Message message, String noteId) {
     zeppelinClient.send(message, noteId);
-  }
-
-  public static int getMaxNoteSize() {
-    return MAXIMUM_NOTE_SIZE;
   }
 }

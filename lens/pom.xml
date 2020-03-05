@@ -22,15 +22,16 @@
   <parent>
     <artifactId>zeppelin</artifactId>
     <groupId>org.apache.zeppelin</groupId>
-    <version>0.6.3-SNAPSHOT</version>
+    <version>0.6.0</version>
     <relativePath>..</relativePath>
   </parent>
 
   <groupId>org.apache.zeppelin</groupId>
   <artifactId>zeppelin-lens</artifactId>
   <packaging>jar</packaging>
-  <version>0.6.3-SNAPSHOT</version>
+  <version>0.6.0</version>
   <name>Zeppelin: Lens interpreter</name>
+  <url>http://www.apache.org</url>
   
   <properties>
     <lens.version>2.5.0-beta</lens.version>
@@ -72,16 +73,6 @@
       <groupId>org.apache.lens</groupId>
       <artifactId>lens-client</artifactId>
       <version>${lens.version}</version>
-      <exclusions>
-      	<exclusion>
-      		<groupId>ch.qos.logback</groupId>
-      		<artifactId>logback-classic</artifactId>
-      	</exclusion>
-      	<exclusion>
-      		<groupId>ch.qos.logback</groupId>
-      		<artifactId>logback-core</artifactId>
-      	</exclusion>
-    </exclusions>
     </dependency>
 
     <dependency>

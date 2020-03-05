@@ -93,12 +93,8 @@ mvn clean package -DskipTests [Options]
 Here are some examples with several options
 
 ```
-# build with spark-2.0, scala-2.11
-./dev/change_scala_version.sh 2.11
-mvn clean package -Pspark-2.0 -Phadoop-2.4 -Pyarn -Ppyspark -Psparkr -Pscala-2.11
-
-# build with spark-1.6, scala-2.10
-mvn clean package -Pspark-1.6 -Phadoop-2.4 -Pyarn -Ppyspark -Psparkr
+# basic build
+mvn clean package -Pspark-1.6 -Phadoop-2.4 -Pyarn -Ppyspark
 
 # spark-cassandra integration
 mvn clean package -Pcassandra-spark-1.5 -Dhadoop.version=2.6.0 -Phadoop-2.6 -DskipTests
@@ -182,9 +178,9 @@ Congratulation on your successful Apache Zeppelin installation! Here are two nex
  * After getting familiar with Apache Zeppelin UI, have fun with a short walk-through [Tutorial](../quickstart/tutorial.html) that uses Apache Spark backend.
  * If you need more configuration setting for Apache Zeppelin, jump to the next section: [Apache Zeppelin Configuration](#apache-zeppelin-configuration).
  
-#### If you need more information about Spark or JDBC interpreter settings
- * Apache Zeppelin provides deep integration with [Apache Spark](http://spark.apache.org/). For more information, see [Spark Interpreter for Apache Zeppelin](../interpreter/spark.html).
- * You can also use generic JDBC connections in Apache Zeppelin. Go to [Generic JDBC Interpreter for Apache Zeppelin](../interpreter/jdbc.html).
+#### If you need more information about Spark or JDBC interpreter setting
+ * Apache Zeppelin provides deep integration with [Apache Spark](http://spark.apache.org/). For the further informtation, see [Spark Interpreter for Apache Zeppelin](../interpreter/spark.html). 
+ * Also, you can use generic JDBC connections in Apache Zeppelin. Go to [Generic JDBC Interpreter for Apache Zeppelin](../interpreter/jdbc.html).
  
 #### If you are in multi-user environment
  * You can set permissions for your notebooks and secure data resource in multi-user environment. Go to **More** -> **Security** section.
@@ -195,8 +191,8 @@ You can configure Apache Zeppelin with both **environment variables** in `conf/z
 
 <table class="table-configuration">
   <tr>
-    <th>zeppelin-env.sh</th>
-    <th>zeppelin-site.xml</th>
+    <th>zepplin-env.sh</th>
+    <th>zepplin-site.xml</th>
     <th>Default value</th>
     <th>Description</th>
   </tr>
@@ -381,10 +377,7 @@ You can configure Apache Zeppelin with both **environment variables** in `conf/z
     <td>org.apache.zeppelin.spark.SparkInterpreter,<br />org.apache.zeppelin.spark.PySparkInterpreter,<br />org.apache.zeppelin.spark.SparkSqlInterpreter,<br />org.apache.zeppelin.spark.DepInterpreter,<br />org.apache.zeppelin.markdown.Markdown,<br />org.apache.zeppelin.shell.ShellInterpreter,<br />
     ...
     </td>
-    <td>
-      Comma separated interpreter configurations [Class] <br/>
-      <span style="font-style:italic">NOTE: This property is deprecated since Zeppelin-0.6.0 and will not be supported from Zeppelin-0.7.0</span>
-    </td>
+    <td>Comma separated interpreter configurations [Class] <br /> The first interpreter will be a default value. <br /> It means only the first interpreter in this list can be available without <code>%interpreter_name</code> annotation in notebook paragraph. </td>
   </tr>
   <tr>
     <td>ZEPPELIN_INTERPRETER_DIR</td>

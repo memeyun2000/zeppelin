@@ -39,7 +39,6 @@ import org.apache.zeppelin.scheduler.Job.Status;
 import org.apache.zeppelin.scheduler.JobListener;
 import org.apache.zeppelin.scheduler.JobProgressPoller;
 import org.apache.zeppelin.scheduler.Scheduler;
-import org.apache.zeppelin.scheduler.SchedulerFactory;
 import org.apache.zeppelin.user.AuthenticationInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -227,19 +226,9 @@ public class RemoteInterpreterServer
           Interpreter inp = it.next();
           if (inp.getClassName().equals(className)) {
             inp.close();
-
-            Scheduler scheduler = inp.getScheduler();
-            if (scheduler != null) {
-              SchedulerFactory.singleton().removeScheduler(scheduler.getName());
-            }
-
             it.remove();
             break;
           }
-        }
-
-        if (interpreters.isEmpty()) {
-          interpreterGroup.remove(noteId);
         }
       }
     }
@@ -460,13 +449,11 @@ public class RemoteInterpreterServer
     return new InterpreterOutput(new InterpreterOutputListener() {
       @Override
       public void onAppend(InterpreterOutput out, byte[] line) {
-        logger.debug("Output Append:" + new String(line));
         eventClient.onInterpreterOutputAppend(noteId, paragraphId, new String(line));
       }
 
       @Override
       public void onUpdate(InterpreterOutput out, byte[] output) {
-        logger.debug("Output Update:" + new String(output));
         eventClient.onInterpreterOutputUpdate(noteId, paragraphId, new String(output));
       }
     });

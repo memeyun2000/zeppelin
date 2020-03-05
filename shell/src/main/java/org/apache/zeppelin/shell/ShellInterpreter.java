@@ -79,8 +79,8 @@ public class ShellInterpreter extends Interpreter {
     }
     cmdLine.addArgument(cmd, false);
     DefaultExecutor executor = new DefaultExecutor();
-    executor.setStreamHandler(new PumpStreamHandler(contextInterpreter.out,
-            contextInterpreter.out));
+    ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
+    executor.setStreamHandler(new PumpStreamHandler(contextInterpreter.out, errorStream));
     executor.setWatchdog(new ExecuteWatchdog(commandTimeOut));
 
     Job runningJob = getRunningJob(contextInterpreter.getParagraphId());
@@ -95,14 +95,7 @@ public class ShellInterpreter extends Interpreter {
       int exitValue = e.getExitValue();
       logger.error("Can not run " + cmd, e);
       Code code = Code.ERROR;
-      String msg = null;
-      try {
-        contextInterpreter.out.flush();
-        msg = new String(contextInterpreter.out.toByteArray());
-      } catch (IOException e1) {
-        logger.error(e1.getMessage());
-        msg = e1.getMessage();
-      }
+      String msg = errorStream.toString();
       if (exitValue == 143) {
         code = Code.INCOMPLETE;
         msg = msg + "Paragraph received a SIGTERM.\n";

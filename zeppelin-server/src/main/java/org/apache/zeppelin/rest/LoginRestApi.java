@@ -17,6 +17,7 @@
 package org.apache.zeppelin.rest;
 
 import org.apache.shiro.authc.*;
+import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.Subject;
 import org.apache.zeppelin.annotation.ZeppelinApi;
 import org.apache.zeppelin.server.JsonResponse;
@@ -111,15 +112,22 @@ public class LoginRestApi {
     LOG.warn(response.toString());
     return response.build();
   }
-
+  
   @POST
   @Path("logout")
   @ZeppelinApi
   public Response logout() {
     JsonResponse response;
+    
     Subject currentUser = org.apache.shiro.SecurityUtils.getSubject();
     currentUser.logout();
-    response = new JsonResponse(Response.Status.UNAUTHORIZED, "", "");
+
+    Map<String, String> data = new HashMap<>();
+    data.put("principal", "anonymous");
+    data.put("roles", "");
+    data.put("ticket", "anonymous");
+   
+    response = new JsonResponse(Response.Status.OK, "", data);
     LOG.warn(response.toString());
     return response.build();
   }

@@ -21,22 +21,21 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import org.apache.spark.repl.SparkILoop;
+import org.apache.spark.repl.SparkIMain;
+import org.apache.spark.repl.SparkJLineCompletion;
 import org.apache.zeppelin.interpreter.Interpreter;
 import org.apache.zeppelin.interpreter.InterpreterContext;
 import org.apache.zeppelin.interpreter.InterpreterGroup;
+import org.apache.zeppelin.interpreter.InterpreterPropertyBuilder;
 import org.apache.zeppelin.interpreter.InterpreterResult;
 import org.apache.zeppelin.interpreter.InterpreterResult.Code;
 import org.apache.zeppelin.interpreter.WrappedInterpreter;
@@ -52,12 +51,9 @@ import scala.Console;
 import scala.None;
 import scala.Some;
 import scala.collection.convert.WrapAsJava$;
-import scala.collection.JavaConversions;
 import scala.tools.nsc.Settings;
 import scala.tools.nsc.interpreter.Completion.Candidates;
 import scala.tools.nsc.interpreter.Completion.ScalaCompleter;
-import scala.tools.nsc.interpreter.IMain;
-import scala.tools.nsc.interpreter.Results;
 import scala.tools.nsc.settings.MutableSettings.BooleanSetting;
 import scala.tools.nsc.settings.MutableSettings.PathSetting;
 
@@ -68,17 +64,10 @@ import scala.tools.nsc.settings.MutableSettings.PathSetting;
  *
  */
 public class DepInterpreter extends Interpreter {
-  /**
-   * intp - org.apache.spark.repl.SparkIMain (scala 2.10)
-   * intp - scala.tools.nsc.interpreter.IMain; (scala 2.11)
-   */
-  private Object intp;
+  private SparkIMain intp;
   private ByteArrayOutputStream out;
   private SparkDependencyContext depc;
-  /**
-   * completer - org.apache.spark.repl.SparkJLineCompletion (scala 2.10)
-   */
-  private Object completer;
+  private SparkJLineCompletion completor;
   private SparkILoop interpreter;
   static final Logger LOGGER = LoggerFactory.getLogger(DepInterpreter.class);
 
@@ -114,7 +103,7 @@ public class DepInterpreter extends Interpreter {
   @Override
   public void close() {
     if (intp != null) {
-      Utils.invokeMethod(intp, "close");
+      intp.close();
     }
   }
 
@@ -160,53 +149,31 @@ public class DepInterpreter extends Interpreter {
     b.v_$eq(true);
     settings.scala$tools$nsc$settings$StandardScalaSettings$_setter_$usejavacp_$eq(b);
 
-    interpreter = new SparkILoop((java.io.BufferedReader) null, new PrintWriter(out));
+    interpreter = new SparkILoop(null, new PrintWriter(out));
     interpreter.settings_$eq(settings);
 
     interpreter.createInterpreter();
 
 
-    intp = Utils.invokeMethod(interpreter, "intp");
-
-    if (Utils.isScala2_10()) {
-      Utils.invokeMethod(intp, "setContextClassLoader");
-      Utils.invokeMethod(intp, "initializeSynchronous");
-    }
+    intp = interpreter.intp();
+    intp.setContextClassLoader();
+    intp.initializeSynchronous();
 
     depc = new SparkDependencyContext(getProperty("zeppelin.dep.localrepo"),
                                  getProperty("zeppelin.dep.additionalRemoteRepository"));
-    if (Utils.isScala2_10()) {
-      completer = Utils.instantiateClass(
-          "org.apache.spark.repl.SparkJLineCompletion",
-          new Class[]{Utils.findClass("org.apache.spark.repl.SparkIMain")},
-          new Object[]{intp});
-    }
-    interpret("@transient var _binder = new java.util.HashMap[String, Object]()");
-    Map<String, Object> binder;
-    if (Utils.isScala2_10()) {
-      binder = (Map<String, Object>) getValue("_binder");
-    } else {
-      binder = (Map<String, Object>) getLastObject();
-    }
+    completor = new SparkJLineCompletion(intp);
+    intp.interpret("@transient var _binder = new java.util.HashMap[String, Object]()");
+    Map<String, Object> binder = (Map<String, Object>) getValue("_binder");
     binder.put("depc", depc);
 
-    interpret("@transient val z = "
+    intp.interpret("@transient val z = "
         + "_binder.get(\"depc\")"
         + ".asInstanceOf[org.apache.zeppelin.spark.dep.SparkDependencyContext]");
 
   }
 
-  private Results.Result interpret(String line) {
-    return (Results.Result) Utils.invokeMethod(
-        intp,
-        "interpret",
-        new Class[] {String.class},
-        new Object[] {line});
-  }
-
   public Object getValue(String name) {
-    Object ret = Utils.invokeMethod(
-      intp, "valueOfTerm", new Class[]{String.class}, new Object[]{name});
+    Object ret = intp.valueOfTerm(name);
     if (ret instanceof None) {
       return null;
     } else if (ret instanceof Some) {
@@ -214,13 +181,6 @@ public class DepInterpreter extends Interpreter {
     } else {
       return ret;
     }
-  }
-
-  public Object getLastObject() {
-    IMain.Request r = (IMain.Request) Utils.invokeMethod(intp, "lastRequest");
-    Object obj = r.lineRep().call("$result",
-        JavaConversions.asScalaBuffer(new LinkedList<Object>()));
-    return obj;
   }
 
   @Override
@@ -238,7 +198,7 @@ public class DepInterpreter extends Interpreter {
           "restart Zeppelin/Interpreter" );
     }
 
-    scala.tools.nsc.interpreter.Results.Result ret = interpret(st);
+    scala.tools.nsc.interpreter.Results.Result ret = intp.interpret(st);
     Code code = getResultCode(ret);
 
     try {
@@ -285,21 +245,17 @@ public class DepInterpreter extends Interpreter {
 
   @Override
   public List<InterpreterCompletion> completion(String buf, int cursor) {
-    if (Utils.isScala2_10()) {
-      ScalaCompleter c = (ScalaCompleter) Utils.invokeMethod(completer, "completer");
-      Candidates ret = c.complete(buf, cursor);
+    ScalaCompleter c = completor.completer();
+    Candidates ret = c.complete(buf, cursor);
 
-      List<String> candidates = WrapAsJava$.MODULE$.seqAsJavaList(ret.candidates());
-      List<InterpreterCompletion> completions = new LinkedList<InterpreterCompletion>();
+    List<String> candidates = WrapAsJava$.MODULE$.seqAsJavaList(ret.candidates());
+    List<InterpreterCompletion> completions = new LinkedList<InterpreterCompletion>();
 
-      for (String candidate : candidates) {
-        completions.add(new InterpreterCompletion(candidate, candidate));
-      }
-
-      return completions;
-    } else {
-      return new LinkedList<InterpreterCompletion>();
+    for (String candidate : candidates) {
+      completions.add(new InterpreterCompletion(candidate, candidate));
     }
+
+    return completions;
   }
 
   private List<File> currentClassPath() {

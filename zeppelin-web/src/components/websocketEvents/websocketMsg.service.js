@@ -161,12 +161,8 @@ angular.module('zeppelinWebApp').service('websocketMsgSrv', function($rootScope,
       });
     },
 
-    isConnected: function() {
+    isConnected: function(){
       return websocketEvents.isConnected();
-    },
-
-    listConfigurations: function() {
-      websocketEvents.sendNewEvent({op: 'LIST_CONFIGURATIONS'});
     }
 
   };

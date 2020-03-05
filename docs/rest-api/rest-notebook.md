@@ -298,10 +298,7 @@ If you work with Apache Zeppelin and find a need for an additional REST API, ple
     <col width="200">
     <tr>
       <td>Description</td>
-      <td>
-      This ```POST``` method runs all paragraphs in the given notebook id. <br />
-      If you can not find Notebook id 404 returns.
-      If there is a problem with the interpreter returns a 412 error.
+      <td>This ```POST``` method runs all paragraphs in the given notebook id.
       </td>
     </tr>
     <tr>
@@ -314,28 +311,11 @@ If you work with Apache Zeppelin and find a need for an additional REST API, ple
     </tr>
     <tr>
       <td> Fail code</td>
-      <td> 404 or 412</td>
+      <td> 500 </td>
     </tr>
     <tr>
       <td> sample JSON response </td>
       <td><pre>{"status": "OK"}</pre></td>
-    </tr>
-    <tr>
-       <td> sample JSON error response </td>
-       <td>
-         <pre>
-           {
-             "status": "NOT_FOUND",
-             "message": "note not found."
-           }
-         </pre><br />
-         <pre>
-           {
-             "status": "PRECONDITION_FAILED",
-             "message": "paragraph_1469771130099_-278315611 Not selected or Invalid Interpreter bind"
-           }
-         </pre>
-       </td>
     </tr>
   </table>
 

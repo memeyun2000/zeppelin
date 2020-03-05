@@ -22,11 +22,14 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Notebook websocket
  */
 public class NotebookSocket extends WebSocketAdapter {
+  private static final Logger LOG = LoggerFactory.getLogger(NotebookSocket.class);
 
   private Session connection;
   private NotebookSocketListener listener;
@@ -65,7 +68,8 @@ public class NotebookSocket extends WebSocketAdapter {
     return protocol;
   }
 
-  public synchronized void send(String serializeMessage) throws IOException {
+  public void send(String serializeMessage) throws IOException {
+    LOG.info(serializeMessage);
     connection.getRemote().sendString(serializeMessage);
   }
 
