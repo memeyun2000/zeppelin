@@ -502,7 +502,8 @@ public class Note implements Serializable, JobListener {
   }
 
   public void persist(AuthenticationInfo subject) throws IOException {
-    stopDelayedPersistTimer(); // guoqy: ???
+    // guoqy: ???
+    stopDelayedPersistTimer();
     snapshotAngularObjectRegistry();
     index.updateIndexDoc(this);
     repo.save(this, subject);

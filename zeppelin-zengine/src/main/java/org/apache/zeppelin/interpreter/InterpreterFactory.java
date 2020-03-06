@@ -70,7 +70,7 @@ public class InterpreterFactory implements InterpreterGroupFactory {
 
   private Map<String, InterpreterSetting> interpreterSettings =
       new HashMap<String, InterpreterSetting>();
-
+  // guoqy: interpreterBindings 存储的应该是 notebook绑定的interpreters
   private Map<String, List<String>> interpreterBindings = new HashMap<String, List<String>>();
   private List<RemoteRepository> interpreterRepositories;
 
@@ -366,6 +366,10 @@ public class InterpreterFactory implements InterpreterGroupFactory {
     }
   }
 
+  /**
+   * guoqy: 保存 interperter.json to local file
+   * @throws IOException
+   */
   private void saveToFile() throws IOException {
     String jsonString;
 

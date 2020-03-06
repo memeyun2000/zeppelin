@@ -564,6 +564,18 @@ public class NotebookServer extends WebSocketServlet implements
     broadcastNoteList(subject);
   }
 
+  /**
+   * guoqy:
+   * 1. notebook权限删除
+   * 2. note的索引删除
+   * 3. 所有解释器的angular对象删除该 note 的注册 ??? what is interpreter's Angular object registry ?
+   * 4.
+   * @param conn
+   * @param userAndRoles
+   * @param notebook
+   * @param fromMessage
+   * @throws IOException
+   */
   private void removeNote(NotebookSocket conn, HashSet<String> userAndRoles,
                           Notebook notebook, Message fromMessage)
       throws IOException {
@@ -573,13 +585,14 @@ public class NotebookServer extends WebSocketServlet implements
     }
 
     Note note = notebook.getNote(noteId);
+    //guoqy: ??? NotebookAuthorization 内容未知
     NotebookAuthorization notebookAuthorization = notebook.getNotebookAuthorization();
     if (!notebookAuthorization.isOwner(noteId, userAndRoles)) {
       permissionError(conn, "remove", fromMessage.principal,
           userAndRoles, notebookAuthorization.getOwners(noteId));
       return;
     }
-
+    //guoqy: ??? AuthenticationInfo 内容未知
     AuthenticationInfo subject = new AuthenticationInfo(fromMessage.principal);
     notebook.removeNote(noteId, subject);
     removeNote(noteId);
