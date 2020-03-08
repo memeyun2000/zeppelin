@@ -157,9 +157,11 @@ public class NotebookServer extends WebSocketServlet implements
             createNote(conn, userAndRoles, notebook, messagereceived);
             break;
           case DEL_NOTE:
+            //guoqy: 删除笔记
             removeNote(conn, userAndRoles, notebook, messagereceived);
             break;
           case CLONE_NOTE:
+            //guoqy: 复制笔记
             cloneNote(conn, userAndRoles, notebook, messagereceived);
             break;
           case IMPORT_NOTE:
@@ -569,7 +571,10 @@ public class NotebookServer extends WebSocketServlet implements
    * 1. notebook权限删除
    * 2. note的索引删除
    * 3. 所有解释器的angular对象删除该 note 的注册 ??? what is interpreter's Angular object registry ?
-   * 4.
+   * 4. 删除 note 与 interpreter 的关系
+   * 5. 物理删除 note 持久化数据
+   * 6. 移除note在notebookServer中的注册（从notebookServer.noteSocketMap中remove）
+   * 7. 广播所有连接，告知新的notes
    * @param conn
    * @param userAndRoles
    * @param notebook
@@ -585,14 +590,16 @@ public class NotebookServer extends WebSocketServlet implements
     }
 
     Note note = notebook.getNote(noteId);
-    //guoqy: ??? NotebookAuthorization 内容未知
+    //guoqy: NotebookAuthorization 内容: authInfo Map<String,Set<String>>
+    //guoqy: authInfo 默认无内容
     NotebookAuthorization notebookAuthorization = notebook.getNotebookAuthorization();
     if (!notebookAuthorization.isOwner(noteId, userAndRoles)) {
       permissionError(conn, "remove", fromMessage.principal,
           userAndRoles, notebookAuthorization.getOwners(noteId));
       return;
     }
-    //guoqy: ??? AuthenticationInfo 内容未知
+    //guoqy: AuthenticationInfo 内容：user:String, ticket:String
+    //guoqy: 默认使用匿名 anonymous 用户
     AuthenticationInfo subject = new AuthenticationInfo(fromMessage.principal);
     notebook.removeNote(noteId, subject);
     removeNote(noteId);
@@ -629,6 +636,16 @@ public class NotebookServer extends WebSocketServlet implements
     broadcast(note.id(), new Message(OP.PARAGRAPH).put("paragraph", p));
   }
 
+  /**
+   * guoqy: 1. clone note  1) 复制权限 2) 复制与interpreter的绑定 3) 加索引 持久化
+   *        2. 广播 notes 至所有连接
+   * @param conn
+   * @param userAndRoles
+   * @param notebook
+   * @param fromMessage
+   * @throws IOException
+   * @throws CloneNotSupportedException
+   */
   private void cloneNote(NotebookSocket conn, HashSet<String> userAndRoles,
                          Notebook notebook, Message fromMessage)
       throws IOException, CloneNotSupportedException {

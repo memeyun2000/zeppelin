@@ -38,6 +38,7 @@ public class NotebookAuthorization {
   private Map<String, Map<String, Set<String>>> authInfo = new HashMap<>();
   private ZeppelinConfiguration conf;
   private Gson gson;
+  // guoqy: 授权文件的路径 notebook-authorization.json
   private String filePath;
 
   public NotebookAuthorization(ZeppelinConfiguration conf) {

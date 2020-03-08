@@ -63,6 +63,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
 /**
  * Collection of Notes.
+ * guoqy: zeppelinServer 持有 notebook 对象
  */
 public class Notebook {
   static Logger logger = LoggerFactory.getLogger(Notebook.class);
@@ -70,6 +71,9 @@ public class Notebook {
   @SuppressWarnings("unused") @Deprecated //TODO(bzz): remove unused
   private SchedulerFactory schedulerFactory;
 
+  //guoqy: 在这里声明    interpreterFactory
+  //       该对象包含了  interpreterSettings(默认的所有 interpreter 配置信息)
+  //                    interpreterBindings(所有 note 绑定的 interpreter )
   private InterpreterFactory replFactory;
   /** Keep the order. */
   Map<String, Note> notes = new LinkedHashMap<String, Note>();
@@ -223,6 +227,9 @@ public class Notebook {
 
   /**
    * Clone existing note.
+   * guoqy: clone note to interpreterBinds
+   * guoqy: add index
+   * guoqy: persist note
    * @param sourceNoteID - the note ID to clone
    * @param newNoteName - the name of the new note
    * @return noteId
@@ -293,8 +300,11 @@ public class Notebook {
     synchronized (notes) {
       note = notes.remove(id);
     }
+    // guoqy: 删除 note 与 interpreter 的绑定关系
+    // guoqy: 影响对象：(InterpreterFactory)replFactory.interpreterSettings
     replFactory.removeNoteInterpreterSettingBinding(id);
     notebookIndex.deleteIndexDocs(note);
+    // guoqy: 删除和这个 note 有关的授权
     notebookAuthorization.removeNote(id);
 
     // remove from all interpreter instance's angular object registry
@@ -317,9 +327,11 @@ public class Notebook {
       }
     }
 
+    // guoqy: ??? 内容未知
     ResourcePoolUtils.removeResourcesBelongsToNote(id);
 
     try {
+      // guoqy: 物理删除note
       note.unpersist(subject);
     } catch (IOException e) {
       logger.error(e.toString(), e);
@@ -412,6 +424,7 @@ public class Notebook {
     List<NoteInfo> noteInfos = notebookRepo.list(null);
 
     for (NoteInfo info : noteInfos) {
+      //guoqy: 获取所有的 note 并添加至 notebook.notes
       loadNoteFromRepo(info.getId(), null);
     }
   }

@@ -68,9 +68,11 @@ public class InterpreterFactory implements InterpreterGroupFactory {
   private ZeppelinConfiguration conf;
   String[] interpreterClassList;
 
+  // guoqy: 记录 note 与 interpreters 的绑定关系
+  // guoqy: key: note id ,value: List<interpreter id>
   private Map<String, InterpreterSetting> interpreterSettings =
       new HashMap<String, InterpreterSetting>();
-  // guoqy: interpreterBindings 存储的应该是 notebook绑定的interpreters
+  // guoqy: interpreterBindings 存储的应该是 note 绑定的interpreters,key -> note id ; value -> interpreter id
   private Map<String, List<String>> interpreterBindings = new HashMap<String, List<String>>();
   private List<RemoteRepository> interpreterRepositories;
 
