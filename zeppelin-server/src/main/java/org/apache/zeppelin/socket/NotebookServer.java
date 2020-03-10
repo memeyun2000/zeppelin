@@ -64,7 +64,15 @@ public class NotebookServer extends WebSocketServlet implements
         RemoteInterpreterProcessListener {
   private static final Logger LOG = LoggerFactory.getLogger(NotebookServer.class);
   Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").create();
+  // guoqy: 记录 note 与 socket conn 的关系
+  //        1. 创建笔记时 记录关系
+  //        2. 复制笔记时 记录关系
+  //        3. sendNote (GET_NOTE)
+  //        4. sendHomeNote (GET_HOME_NOTE)
   final Map<String, List<NotebookSocket>> noteSocketMap = new HashMap<>();
+  // guoqy: 用处：1. 当创建连接时 add conn
+  //             2. 当关闭连接时 remove conn
+  //             3. 当执行某些操作（复制、新建、删除note） 广播消息(Message)使用
   final Queue<NotebookSocket> connectedSockets = new ConcurrentLinkedQueue<>();
 
   private Notebook notebook() {
@@ -165,6 +173,7 @@ public class NotebookServer extends WebSocketServlet implements
             cloneNote(conn, userAndRoles, notebook, messagereceived);
             break;
           case IMPORT_NOTE:
+            //guoqy: 从 json 导入笔记
             importNote(conn, userAndRoles, notebook, messagereceived);
             break;
           case COMMIT_PARAGRAPH:
