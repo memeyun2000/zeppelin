@@ -159,6 +159,7 @@ public class Paragraph extends Job implements Serializable, Cloneable {
     int scriptHeadIndex = 0;
     for (int i = 0; i < text.length(); i++) {
       char ch = text.charAt(i);
+      // guoqy: 不理解 怎么截取法 ??? 下次调试的时候看看
       if (Character.isWhitespace(ch) || ch == '(') {
         scriptHeadIndex = i;
         break;

@@ -69,10 +69,13 @@ public class NotebookServer extends WebSocketServlet implements
   //        2. 复制笔记时 记录关系
   //        3. sendNote (GET_NOTE)
   //        4. sendHomeNote (GET_HOME_NOTE)
+  //        5. important: 以上所有操作都会先遍历 移除 当前conn
+  //        总结来说： 一个连接只能打开一个笔记本，一个笔记本可以有多个连接打开
   final Map<String, List<NotebookSocket>> noteSocketMap = new HashMap<>();
   // guoqy: 用处：1. 当创建连接时 add conn
   //             2. 当关闭连接时 remove conn
   //             3. 当执行某些操作（复制、新建、删除note） 广播消息(Message)使用
+  //              总结：记录每次接入conn 组装进入队列
   final Queue<NotebookSocket> connectedSockets = new ConcurrentLinkedQueue<>();
 
   private Notebook notebook() {
@@ -177,9 +180,12 @@ public class NotebookServer extends WebSocketServlet implements
             importNote(conn, userAndRoles, notebook, messagereceived);
             break;
           case COMMIT_PARAGRAPH:
+            //guoqy: 更新笔记对应的 paragraph
+            //       广播 paragraph 至所有已连接该note的conn
             updateParagraph(conn, userAndRoles, notebook, messagereceived);
             break;
           case RUN_PARAGRAPH:
+            //guoqy: note.run(paragraph id) ??? 内容未知
             runParagraph(conn, userAndRoles, notebook, messagereceived);
             break;
           case CANCEL_PARAGRAPH:
@@ -283,6 +289,11 @@ public class NotebookServer extends WebSocketServlet implements
     }
   }
 
+  /**
+   * guoqy: 获取当前conn打开的note id
+   * @param socket 当前打开的连接
+   * @return
+   */
   private String getOpenNoteId(NotebookSocket socket) {
     String id = null;
     synchronized (noteSocketMap) {
@@ -312,6 +323,11 @@ public class NotebookServer extends WebSocketServlet implements
     }
   }
 
+  /**
+   * guoqy: 向所有持有该note的conn发送消息 [c-s]
+   * @param noteId
+   * @param m
+   */
   private void broadcast(String noteId, Message m) {
     synchronized (noteSocketMap) {
       List<NotebookSocket> socketLists = noteSocketMap.get(noteId);
