@@ -106,6 +106,7 @@ public class FIFOScheduler implements Scheduler {
 
     synchronized (queue) {
       while (terminate == false) {
+        //guoqy: 有任务进行 或 队列为空则 等待500毫秒
         synchronized (queue) {
           if (runningJob != null || queue.isEmpty() == true) {
             try {
