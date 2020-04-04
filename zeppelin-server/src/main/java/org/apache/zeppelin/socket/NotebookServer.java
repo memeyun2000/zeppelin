@@ -185,7 +185,8 @@ public class NotebookServer extends WebSocketServlet implements
             updateParagraph(conn, userAndRoles, notebook, messagereceived);
             break;
           case RUN_PARAGRAPH:
-            //guoqy: note.run(paragraph id) ??? 内容未知
+            //guoqy: 把paragraph提交到schedule schedule的如何调度未知 ???
+            //guoqy: 通过LazyOpenInterpreter的schedule提交
             runParagraph(conn, userAndRoles, notebook, messagereceived);
             break;
           case CANCEL_PARAGRAPH:
@@ -1109,6 +1110,7 @@ public class NotebookServer extends WebSocketServlet implements
     AuthenticationInfo subject = new AuthenticationInfo(fromMessage.principal);
     note.persist(subject);
     try {
+      // guoqy: 只有这才是刚刚开始
       note.run(paragraphId);
     } catch (Exception ex) {
       LOG.error("Exception from run", ex);
