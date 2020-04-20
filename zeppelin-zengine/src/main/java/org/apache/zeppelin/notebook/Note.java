@@ -430,6 +430,9 @@ public class Note implements Serializable, JobListener {
       }
     }
     if (p.getConfig().get("enabled") == null || (Boolean) p.getConfig().get("enabled")) {
+      //guoqy: getSchedule() 方法会启动 schedule.run 循环不停的执行schudule.queue中的任务
+      //guoqy: schedule 为单例对象，实例化后开始执行任务
+      //guoqy: interpreter 是抽象类，默认声明FIFOSchedule
       intp.getScheduler().submit(p);
     }
   }
