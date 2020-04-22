@@ -249,6 +249,7 @@ public class Paragraph extends Job implements Serializable, Cloneable {
   @Override
   protected Object jobRun() throws Throwable {
     String replName = getRequiredReplName();
+    //guoqy:这里获取RemoteInterpreter但是没有起动
     Interpreter repl = getRepl(replName);
     logger().info("run paragraph {} using {} " + repl, getId(), replName);
     if (repl == null) {
@@ -258,6 +259,7 @@ public class Paragraph extends Job implements Serializable, Cloneable {
 
     String script = getScriptBody();
     // inject form
+    //guoqy:interpreter 进程从调用getFormType时 startup
     if (repl.getFormType() == FormType.NATIVE) {
       settings.clear();
     } else if (repl.getFormType() == FormType.SIMPLE) {

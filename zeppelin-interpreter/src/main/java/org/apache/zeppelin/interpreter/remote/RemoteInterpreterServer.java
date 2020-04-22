@@ -126,6 +126,7 @@ public class RemoteInterpreterServer
       throws TTransportException, InterruptedException {
     int port = Integer.parseInt(args[0]);
     RemoteInterpreterServer remoteInterpreterServer = new RemoteInterpreterServer(port);
+    //guoqy: 为什么要新起一个线程启动thrift server? 想不通呀？
     remoteInterpreterServer.start();
     remoteInterpreterServer.join();
     System.exit(0);
