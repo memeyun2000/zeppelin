@@ -90,7 +90,7 @@ public class RemoteInterpreterProcess implements ExecuteResultHandler {
   public int getPort() {
     return port;
   }
-
+  // guoqy: 启动interpreter server
   public int reference(InterpreterGroup interpreterGroup) {
     synchronized (referenceCount) {
       if (executor == null) {
@@ -153,6 +153,8 @@ public class RemoteInterpreterProcess implements ExecuteResultHandler {
               "Not starting interpreter as \"isExistingProcess\" is enabled");
         }
 
+        //guoqy: 手工join()方法？ 等待interpreter server完全启动ok
+        //guoqy: 手工join()的过程,就是启动socket不断探测地址和端口是否被占用
         long startTime = System.currentTimeMillis();
         while (System.currentTimeMillis() - startTime < connectTimeout) {
           if (RemoteInterpreterUtils.checkIfRemoteEndpointAccessible(host, port)) {

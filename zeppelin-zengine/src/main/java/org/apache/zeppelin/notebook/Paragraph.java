@@ -249,7 +249,7 @@ public class Paragraph extends Job implements Serializable, Cloneable {
   @Override
   protected Object jobRun() throws Throwable {
     String replName = getRequiredReplName();
-    //guoqy:这里获取RemoteInterpreter但是没有起动
+    //guoqy:这里获取RemoteInterpreter但是没有起动 replName = "sh"; repl = LazyOpenInterpreter
     Interpreter repl = getRepl(replName);
     logger().info("run paragraph {} using {} " + repl, getId(), replName);
     if (repl == null) {
