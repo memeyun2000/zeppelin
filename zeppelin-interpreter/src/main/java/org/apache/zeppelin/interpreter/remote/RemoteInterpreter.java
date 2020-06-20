@@ -133,6 +133,7 @@ public class RemoteInterpreter extends Interpreter {
     synchronized (intpGroup) {
       if (intpGroup.getRemoteInterpreterProcess() == null) {
         // create new remote process
+        // guoqy: RemoteInterpreterProcess( inter脚本名称,inter脚本路径,本地仓库路径,环境变量（Map）,连接超时时间,监听）
         RemoteInterpreterProcess remoteProcess = new RemoteInterpreterProcess(
             interpreterRunner, interpreterPath, localRepoPath, env, connectTimeout,
             remoteInterpreterProcessListener);

@@ -418,6 +418,7 @@ public class Note implements Serializable, JobListener {
     p.setNoteReplLoader(replLoader);
     p.setListener(jobListenerFactory.getParagraphJobListener(this));
     String requiredReplName = p.getRequiredReplName();
+    //guoqy:
     Interpreter intp = replLoader.get(requiredReplName);
     if (intp == null) {
       // TODO(jongyoul): Make "%jdbc" configurable from JdbcInterpreter
@@ -433,6 +434,10 @@ public class Note implements Serializable, JobListener {
       //guoqy: getSchedule() 方法会启动 schedule.run 循环不停的执行schudule.queue中的任务
       //guoqy: schedule 为单例对象，实例化后开始执行任务
       //guoqy: interpreter 是抽象类，默认声明FIFOSchedule
+      //guoqy: 启动一个新线程运行 paragraph.jobRun()
+      //        1. 启动一个interpreter server 执行 paragraph 的内容
+      //        2. 通过thrift server数据交互 ，Interpreter server作为thrift 的服务端
+      //           主进程作为interpreter server的客户端
       intp.getScheduler().submit(p);
     }
   }

@@ -35,6 +35,26 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.Properties;
 
 /**
+ * guoqy:用于启动RemoteInterpreter  server
+ *
+ * ps -ef|grep interpreter 内容如下：
+ * 20397   19675 /bin/bash /home/memeyun2000/tools/zeppelin/zeppelin-0.6.0/bin/interpreter.sh
+ *    -d /home/memeyun2000/tools/zeppelin/zeppelin-0.6.0/interpreter/sh
+ *    -p 42029
+ *    -l /home/memeyun2000/tools/zeppelin/zeppelin-0.6.0/local-repo/2F6H8XZQX
+ *
+ * 20407   20397 /home/memeyun2000/apps/java/jdk1.8.0_201//bin/java
+ *    -Dfile.encoding=UTF-8
+ *    -Dlog4j.configuration=file:///home/memeyun2000/tools/zeppelin
+ *                          /zeppelin-0.6.0/conf/log4j.properties
+ *    -Dzeppelin.log.file=/home/memeyun2000/tools/zeppelin/zeppelin-0.6.0
+ *                          /logs/zeppelin-interpreter-sh-memeyun2000-memeyun2000.log
+ *    -Xms1024m -Xmx1024m -XX:MaxPermSize=512m
+ *    -cp ::/home/memeyun2000/tools/zeppelin/zeppelin-0.6.0/interpreter/sh/*:
+ *        :/home/memeyun2000/tools/zeppelin/zeppelin-0.6.0/conf
+ *        :/home/memeyun2000/tools/zeppelin/zeppelin-0.6.0/conf
+ *        :/home/memeyun2000/tools/zeppelin/zeppelin-0.6.0/lib/zeppelin-interpreter-0.6.0.jar
+ *    org.apache.zeppelin.interpreter.remote.RemoteInterpreterServer 42029
  *
  */
 public class RemoteInterpreterProcess implements ExecuteResultHandler {
