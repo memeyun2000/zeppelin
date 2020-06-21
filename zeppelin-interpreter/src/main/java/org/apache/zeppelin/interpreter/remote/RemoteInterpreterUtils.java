@@ -30,6 +30,8 @@ import java.net.Socket;
  */
 public class RemoteInterpreterUtils {
   static Logger LOGGER = LoggerFactory.getLogger(RemoteInterpreterUtils.class);
+  // guoqy: 获取随机未占用的端口 ServerSocket(0) 当参数为0
+  // guoqy: 则自动取一个可用端口
   public static int findRandomAvailablePortOnAllLocalInterfaces() throws IOException {
     int port;
     try (ServerSocket socket = new ServerSocket(0);) {
@@ -39,6 +41,8 @@ public class RemoteInterpreterUtils {
     return port;
   }
 
+  // guoqy: 检查端口是否被占用
+  // guoqy: 在RemoteInterpreterProcess中用于检测 cmd 服务是否启动
   public static boolean checkIfRemoteEndpointAccessible(String host, int port) {
     try {
       Socket discover = new Socket();

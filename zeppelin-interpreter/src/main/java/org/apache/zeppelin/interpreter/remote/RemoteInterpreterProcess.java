@@ -230,6 +230,8 @@ public class RemoteInterpreterProcess implements ExecuteResultHandler {
     }
   }
 
+  // guoqy: 停止服务
+  // guoqy: ??? client 如何关闭 没看明白
   public int dereference() {
     synchronized (referenceCount) {
       int r = referenceCount.decrementAndGet();
