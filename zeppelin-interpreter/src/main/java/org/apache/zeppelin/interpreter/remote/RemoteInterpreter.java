@@ -153,6 +153,7 @@ public class RemoteInterpreter extends Interpreter {
     RemoteInterpreterProcess interpreterProcess = getInterpreterProcess();
 
     final InterpreterGroup interpreterGroup = getInterpreterGroup();
+    //guoqy: 启动remote interpreter server
     interpreterProcess.reference(interpreterGroup);
     interpreterProcess.setMaxPoolSize(
         Math.max(this.maxPoolSize, interpreterProcess.getMaxPoolSize()));
@@ -267,6 +268,9 @@ public class RemoteInterpreter extends Interpreter {
     try {
 
       final GUI currentGUI = context.getGui();
+      //guoqy: 发送执行请求给thrift server
+      //guoqy: className : ShellInterpreter
+      //guoqy: st : echo 'hello world'
       RemoteInterpreterResult remoteResult = client.interpret(
           noteId, className, st, convert(context));
 
