@@ -72,7 +72,8 @@ public class InterpreterFactory implements InterpreterGroupFactory {
   // guoqy: key: note id ,value: List<interpreter id>
   private Map<String, InterpreterSetting> interpreterSettings =
       new HashMap<String, InterpreterSetting>();
-  // guoqy: interpreterBindings 存储的应该是 note 绑定的interpreters,key -> note id ; value -> interpreter id
+  // guoqy: interpreterBindings = Map<String,List<String>> 存储的是 Map<noteid , List<interpreter id>>
+  // guoqy: noteid 与 List<interpreter> 的映射关系
   private Map<String, List<String>> interpreterBindings = new HashMap<String, List<String>>();
   private List<RemoteRepository> interpreterRepositories;
 
