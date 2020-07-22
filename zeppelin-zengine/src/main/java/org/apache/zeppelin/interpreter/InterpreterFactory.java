@@ -590,6 +590,8 @@ public class InterpreterFactory implements InterpreterGroupFactory {
             && info.getGroup().equals(groupName)) {
           Interpreter intp;
 
+          // guoqy: 目前所有的interpreter 全部都是remote interpreter
+          // guoqy: remote interpreter 全部会创建 lazyOpenInterpreter
           if (option.isRemote()) {
             intp = createRemoteRepl(info.getPath(),
                 key,

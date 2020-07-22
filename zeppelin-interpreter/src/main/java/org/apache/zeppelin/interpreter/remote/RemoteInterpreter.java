@@ -171,6 +171,10 @@ public class RemoteInterpreter extends Interpreter {
       try {
         logger.info("Create remote interpreter {}", getClassName());
         property.put("zeppelin.interpreter.localRepo", localRepoPath);
+        // guoqy: 客户端持有remoteInterpreter 用于发送和获取 thrift server 的 实例化的interpreter 执行结果
+        // guoqy: 这里发送初始化 thrift server 的 interpreter 请求
+        // guoqy: 告诉 thrift server 应该如何实例化 interpreter
+        // guoqy: 应参见 RemoteInterpreterServer.createInterpreter
         client.createInterpreter(groupId, noteId,
           getClassName(), (Map) property);
 

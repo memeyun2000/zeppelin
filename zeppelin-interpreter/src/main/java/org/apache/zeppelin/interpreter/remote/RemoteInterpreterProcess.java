@@ -142,6 +142,8 @@ public class RemoteInterpreterProcess implements ExecuteResultHandler {
           } catch (IOException e1) {
             throw new InterpreterException(e1);
           }
+          // guoqy: ./interpreter.sh
+          // guoqy: 这里运行的是 RemoteInterpreterServer
           CommandLine cmdLine = CommandLine.parse(interpreterRunner);
           cmdLine.addArgument("-d", false);
           cmdLine.addArgument(interpreterDir, false);
